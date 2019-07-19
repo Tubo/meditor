@@ -75,11 +75,11 @@ viewSection section =
 
         _ ->
             div [ class "box" ]
-                [ p [ class "has-text-left" ] [ viewSectionTitle (trimmed_section section) ] ]
+                [ viewSectionContent (trimmed_section section) ]
 
 
-viewSectionTitle : String -> Html Msg
-viewSectionTitle section =
+viewSectionContent : String -> Html Msg
+viewSectionContent section =
     let
         lines =
             String.lines section
@@ -93,9 +93,9 @@ viewSectionTitle section =
     case first of
         Just title ->
             div []
-                [ h1 [ class "title is-5" ] [ text title ]
-                , p [] [ text (String.join "\n" rest) ]
-                ]
+                ([ h1 [ class "title is-5" ] [ text title ] ]
+                    ++ List.map (\l -> p [] [ text l ]) rest
+                )
 
         Nothing ->
             span [] []
