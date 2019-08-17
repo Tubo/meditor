@@ -1,108 +1,70 @@
 module Main exposing (main)
 
 import Browser
-import Html exposing (Html, div, h1, p, span, text, textarea)
-import Html.Attributes exposing (class, rows, value)
-import Html.Events exposing (onInput)
-import List exposing (drop, head)
+import Element exposing (..)
+import Element.Background as Background
+import Element.Border as Border
+import Element.Font as Font
+import Html exposing (Html)
 
 
 type alias Model =
     { body : String }
 
 
-template_OOPD : String
-template_OOPD =
-    """# Name:
-NHI:
-
-# History and exam
-
-# PMHx
-
-# Meds
-
-# Allergy
-
-# SHx
-_HD
-Work:
-
-# Smoker
-
-# Impression / X-ray
-
-# Plan
-"""
+type Msg
+    = UpdateBody String
 
 
 initModel : Model
 initModel =
-    { body = template_OOPD }
+    { body = "" }
+
+
+channelPanel : List String -> String -> Element msg
+channelPanel channels activeChannel =
+    let
+        activeChannelAttrs =
+            [ Background.color (rgb255 117 179 201), Font.bold ]
+
+        channelAttrs =
+            [ width fill, paddingXY 15 5 ]
+
+        channelEl channel =
+            el
+                (if channel == activeChannel then
+                    activeChannelAttrs ++ channelAttrs
+
+                 else
+                    channelAttrs
+                )
+                (text ("# " ++ channel))
+    in
+    column
+        [ height fill
+        , width (fillPortion 1)
+        , Background.color (rgb255 92 99 118)
+        , Font.color (rgb255 255 255 255)
+        , paddingXY 0 10
+        ]
+        (List.map channelEl channels)
+
+
+chatPanel : Element msg
+chatPanel =
+    column
+        [ height fill, width (fillPortion 5) ]
+        [ text "chat" ]
 
 
 view : Model -> Html Msg
 view model =
-    let
-        sections =
-            String.split "#" model.body
-    in
-    div [ class "columns" ]
-        [ div [ class "column is-half" ]
-            [ textarea
-                [ value model.body
-                , onInput UpdateBody
-                , class "textarea"
-                , rows 50
-                ]
-                []
+    layout []
+        (row [ height fill, width fill ]
+            [ channelPanel [ "hello", "world" ] "hello"
+            , chatPanel
             ]
-        , div [ class "column is-half" ]
-            (List.map viewSection sections)
-        ]
-
-
-viewSection : String -> Html Msg
-viewSection section =
-    let
-        trimmed_section s =
-            s
-                |> String.trim
-    in
-    case section of
-        "" ->
-            span [] []
-
-        _ ->
-            div [ class "box" ]
-                [ viewSectionContent (trimmed_section section) ]
-
-
-viewSectionContent : String -> Html Msg
-viewSectionContent section =
-    let
-        lines =
-            String.lines section
-
-        first =
-            head lines
-
-        rest =
-            drop 1 lines
-    in
-    case first of
-        Just title ->
-            div []
-                ([ h1 [ class "title is-5" ] [ text title ] ]
-                    ++ List.map (\l -> p [] [ text l ]) rest
-                )
-
-        Nothing ->
-            span [] []
-
-
-type Msg
-    = UpdateBody String
+        )
 
 
 update : Msg -> Model -> Model
